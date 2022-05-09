@@ -1233,10 +1233,10 @@ module ocn_adc_mixing_fused
                  utemp = uvel(k,iCell)
                  vtemp = vvel(k,iCell)
                  uvel(k,iCell) = uvel(k,iCell) - dt_small*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) /  &
-                   (ze(k,iCell) - ze(k+1,iCell)) !+ dt_small*fCell(iCell)*vtemp
+                   (ze(k,iCell) - ze(k+1,iCell)) + dt_small*fCell(iCell)*vStokes(k,iCell)
 
                  vvel(k,iCell) = vvel(k,iCell) - dt_small*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) /  &
-                   (ze(k,iCell) - ze(k+1,iCell)) !- dt_small*fCell(iCell)*utemp
+                   (ze(k,iCell) - ze(k+1,iCell)) - dt_small*fCell(iCell)*uStokes(k,iCell)
                  
                  wtSumUp = wt(i1,k,iCell) + areaFraction(k,iCell)*wt_spsD(k,iCell) + &
                    (1.0_RKIND - areaFraction(k,iCell))*wt_spsU(k,iCell)
