@@ -705,12 +705,12 @@ module ocn_adc_mixing_fused
                  wstend5(k,iCell) = kappa_FL*(ws(i1,k-1,iCell) -       &
                    ws(i1,k+1,iCell)) / (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND
 
-                 wstend6(k,iCell) = areaFraction(k,iCell)*(1.0_RKIND - areaFraction(k,iCell))* &
+                 wstend6(k,iCell) = - areaFraction(k,iCell)*(1.0_RKIND - areaFraction(k,iCell))* &
                    sumd(k,iCell)*0.5_RKIND*(Swumd(k-1,iCell) + Swumd(k,iCell)) - Mc(k,iCell)* &
-                   (1.0_RKIND / areaFraction(k,iCell) * (areaFraction(k-1,iCell)*ws_spsU(k-1,iCell) - &
-                   areaFraction(k+1,iCell)*ws_spsU(k+1,iCell)) / (ze(k-1,iCell) - ze(k+1,iCell))  &
-                   -1.0_RKIND/(1.0_RKIND - areaFraction(k,iCell))*((1.0_RKIND - areaFraction(k-1,iCell))* &
-                   ws_spsD(k-1,iCell) - (1.0_RKIND - areaFraction(k+1,iCell))*ws_spsD(k+1,iCell)) / &
+                   (1.0_RKIND / (1.0_RKIND - areaFraction(k,iCell)) * ((1 - areaFraction(k-1,iCell))*ws_spsU(k-1,iCell) - &
+                   (1 - areaFraction(k+1,iCell))*ws_spsU(k+1,iCell)) / (ze(k-1,iCell) - ze(k+1,iCell))  &
+                   -1.0_RKIND/( areaFraction(k,iCell))*(( areaFraction(k-1,iCell))* &
+                   ws_spsD(k-1,iCell) - ( areaFraction(k+1,iCell))*ws_spsD(k+1,iCell)) / &
                    (ze(k-1,iCell) - ze(k+1,iCell)))
 
                  wstend7(k,iCell) = -us(i1,k,iCell)*Ustz - vs(i1,k,iCell)*Vstz
