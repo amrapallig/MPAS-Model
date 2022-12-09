@@ -600,7 +600,7 @@ module ocn_adc_mixing_fused
                  w2tend4(k,iCell) = 2.0_RKIND*Mc(k,iCell)* &
                    (grav*alphaT(k,iCell)*tumd(k,iCell) - grav*betaS(k,iCell)*sumd(k,iCell))
 
-                 w2tend5(k,iCell) = Mc(k,iCell)*(Swumd(k-1,iCell) + Swumd(k,iCell))
+                 w2tend5(k,iCell) = - Mc(k,iCell)*(Swumd(k-1,iCell) + Swumd(k,iCell))
 
                  w2tend7(k,iCell) = -2.0_RKIND*(uw(i1,k,iCell)*Ustz + vw(i1,k,iCell)*Vstz)
 !      Sum the above tendency terms to find the total w2 tendency.
@@ -649,12 +649,12 @@ module ocn_adc_mixing_fused
                  wttend5(k,iCell) = kappa_FL*(wt(i1,k-1,iCell) -       &
                    wt(i1,k+1,iCell)) / (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND
 
-                 wttend6(k,iCell) = areaFraction(k,iCell)*(1.0_RKIND - areaFraction(k,iCell))* &
+                 wttend6(k,iCell) = -areaFraction(k,iCell)*(1.0_RKIND - areaFraction(k,iCell))* &
                    tumd(k,iCell)*0.5_RKIND*(Swumd(k-1,iCell) + Swumd(k,iCell)) - Mc(k,iCell)* &
-                   (1.0_RKIND / areaFraction(k,iCell) * (areaFraction(k-1,iCell)*wt_spsU(k-1,iCell) - &
-                   areaFraction(k+1,iCell)*wt_spsU(k+1,iCell)) / (ze(k-1,iCell) - ze(k+1,iCell))  &
-                   -1.0_RKIND/(1.0_RKIND - areaFraction(k,iCell))*((1.0_RKIND - areaFraction(k-1,iCell))* &
-                   wt_spsD(k-1,iCell) - (1.0_RKIND - areaFraction(k+1,iCell))*wt_spsD(k+1,iCell)) / &
+                   (1.0_RKIND /(1.0_RKIND -  areaFraction(k,iCell)) * ((1.0_RKIND - areaFraction(k-1,iCell))*wt_spsU(k-1,iCell) - &
+                   (1.0_RKIND - areaFraction(k+1,iCell))*wt_spsU(k+1,iCell)) / (ze(k-1,iCell) - ze(k+1,iCell))  &
+                   -1.0_RKIND/(areaFraction(k,iCell))*(( areaFraction(k-1,iCell))* &
+                   wt_spsD(k-1,iCell) - ( areaFraction(k+1,iCell))*wt_spsD(k+1,iCell)) / &
                    (ze(k-1,iCell) - ze(k+1,iCell)))
 
                  wttend7(k,iCell) = -ut(i1,k,iCell)*Ustz - vt(i1,k,iCell)*Vstz
