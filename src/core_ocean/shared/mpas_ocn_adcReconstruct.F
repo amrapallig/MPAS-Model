@@ -801,7 +801,7 @@ module ocn_adc_mixing_fused
                  vwtend6(k,iCell) = -uv(i1,k,iCell)*Ustz - v2(i1,k,iCell)*Vstz
 !      Sum the above tendency terms to find the total vw tendency.
                  vwtend(i3_f,k,iCell) = vwtend1(k,iCell) + vwtend2(k,iCell) + &
-                   vwtend3(k,iCell) + vwtend4(k,iCell) + vwtend5(k,iCell)
+                   vwtend3(k,iCell) + vwtend4(k,iCell) + vwtend5(k,iCell) + vwtend6(k,iCell)
 
                  if (config_adc_truncate_tend) then
                     vwtend(i3_f,k,iCell) = FLOAT (INT(vwtend(i3_f,k,iCell) * adcRound &
