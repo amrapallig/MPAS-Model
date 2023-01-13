@@ -172,6 +172,35 @@ pgi-llnl:
 	"OPENMP = $(OPENMP)" \
 	"CPPFLAGS = $(MODEL_FORMULATION) -D_MPI" )
 
+intel-mpi:
+	( $(MAKE) all \
+    "FC_PARALLEL = mpiifort" \
+    "CC_PARALLEL = mpiicc" \
+    "CXX_PARALLEL = mpiicpc" \
+    "FC_SERIAL = ifort" \
+    "CC_SERIAL = icc" \
+    "CXX_SERIAL = icpc" \
+    "FFLAGS_FPIEEE = -fp-model=precise" \
+    "FFLAGS_PROMOTION = -real-size 64" \
+    "FFLAGS_OPT = -O3 -convert big_endian -free -align array64byte -xHost" \
+    "CFLAGS_OPT = -O3" \
+    "CXXFLAGS_OPT = -O3" \
+    "LDFLAGS_OPT = -O3" \
+    "FFLAGS_DEBUG = -g -convert big_endian -free -CU -CB -check all -fpe0 -traceback" \
+    "CFLAGS_DEBUG = -g -traceback" \
+    "CXXFLAGS_DEBUG = -g -traceback" \
+    "LDFLAGS_DEBUG = -g -fpe0 -traceback" \
+    "FFLAGS_OMP = -qopenmp" \
+    "CFLAGS_OMP = -qopenmp" \
+    "PICFLAG = -fpic" \
+    "BUILD_TARGET = $(@)" \
+    "CORE = $(CORE)" \
+    "DEBUG = $(DEBUG)" \
+    "USE_PAPI = $(USE_PAPI)" \
+	"OPENMP = $(OPENMP)" \
+	"USE_SHTNS = $(USE_SHTNS)" \
+	"CPPFLAGS = $(MODEL_FORMULATION) -D_MPI" )
+
 ifort:
 	( $(MAKE) all \
 	"FC_PARALLEL = mpif90" \
@@ -477,13 +506,13 @@ CPPINCLUDES =
 FCINCLUDES = 
 LIBS = 
 
-#
-# If user has indicated a PIO2 library, define USE_PIO2 pre-processor macro
-#
 ifeq "$(USE_PIO2)" "true"
 	override CPPFLAGS += -DUSE_PIO2
 endif
 
+#
+# If user has indicated a PIO2 library, define USE_PIO2 pre-processor macro
+#
 #
 # Regardless of PIO library version, look for a lib subdirectory of PIO path
 # NB: PIO_LIB is used later, so we don't just set LIBS directly
@@ -699,6 +728,16 @@ ifeq "$(OPENMP)" "true"
 	OPENMP_MESSAGE="MPAS was built with OpenMP enabled."
 else
 	OPENMP_MESSAGE="MPAS was built without OpenMP support."
+endif
+
+ifeq "$(USE_PIO2)" "true"
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Darwin)
+        override LIBS += -lc++
+    else
+        override LIBS += -lstdc++
+    endif
+
 endif
 
 ifeq "$(OPENACC)" "true"
