@@ -855,7 +855,7 @@ module ocn_adc_mixing_fused
 
                  u2tend3(k,iCell) = -2.0_RKIND*uw(i1,k,iCell)*Uz
 
-                 u2tend4(k,iCell) = 2.0_RKIND*tauVel(k,iCell)*u2(i1,k,iCell)/3.0_RKIND !0.0_RKIND
+                 u2tend4(k,iCell) = 0.0_RKIND
 
                  u2tend5(k,iCell) = -2.0_RKIND/3.0_RKIND*eps(i1,k,iCell)
 !      Sum the above tendency terms to find the total u2 tendency.
@@ -863,7 +863,7 @@ module ocn_adc_mixing_fused
 !      included implicitly in the timestepping
                  u2tend(i3_f,k,iCell) = u2tend1(k,iCell) + u2tend2(k,iCell) + &
                    u2tend3(k,iCell) + u2tend4(k,iCell) + u2tend5(k,iCell) + &
-                   u2tend6(k,iCell) !+ 2.0_RKIND*tauVel(k,iCell)*u2(i1,k,iCell)/3.0_RKIND
+                   u2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*u2(i1,k,iCell)/3.0_RKIND
 
                  if (config_adc_truncate_tend) then
                     u2tend(i3_f,k,iCell) = FLOAT (INT(u2tend(i3_f,k,iCell) * adcRound &
@@ -893,7 +893,7 @@ module ocn_adc_mixing_fused
 
                  v2tend3(k,iCell) = -2.0_RKIND*vw(i1,k,iCell)*Vz
 
-                 v2tend4(k,iCell) = 2.0_RKIND*tauVel(k,iCell)*v2(i1,k,iCell)/3.0_RKIND  !0.0_RKIND
+                 v2tend4(k,iCell) = 0.0_RKIND
 
                  v2tend5(k,iCell) = -2.0_RKIND/3.0_RKIND*eps(i1,k,iCell)
 !      Sum the above tendency terms to find the total v2 tendency.
@@ -901,7 +901,7 @@ module ocn_adc_mixing_fused
 !      included implicitly in the timestepping
                  v2tend(i3_f,k,iCell) = v2tend1(k,iCell) + v2tend2(k,iCell) + &
                    v2tend3(k,iCell) + v2tend4(k,iCell) + v2tend5(k,iCell) + &
-                   v2tend6(k,iCell) !+ 2.0_RKIND*tauVel(k,iCell)*v2(i1,k,iCell)/3.0_RKIND
+                   v2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*v2(i1,k,iCell)/3.0_RKIND
 
                  if (config_adc_truncate_tend) then
                     v2tend(i3_f,k,iCell) = FLOAT (INT(v2tend(i3_f,k,iCell) * adcRound &
