@@ -240,6 +240,10 @@ module ocn_adc_mixing_fused
 !                Calculate Stokes drift at vertical midpoint of cells
                  uStokesm(k,iCell) = uStokes_surf*EXP(zm(k,iCell)/stokes_depth)
                  vStokesm(k,iCell) = vStokes_surf*EXP(zm(k,iCell)/stokes_depth)
+                 if (uvel(k,iCell)==0.0_RKIND) then
+                        uvel(k,iCell) = -uStokesm(k,iCell)
+                        vvel(k,iCell) = -vStokesm(k,iCell)
+                endif       
               enddo
 
               do k=1,3
