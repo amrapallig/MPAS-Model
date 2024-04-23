@@ -179,6 +179,7 @@ module ocn_adc_mixing_fused
       real(kind=RKIND) :: lareaFraction, wstar, Q, w3av, tempMoment, frictionVelocity
       real(kind=RKIND) :: sfcFrictionVelocitySquared, wtSumUp, wtSumDn, wsSumUp, wsSumDn
       real(kind=RKIND) :: uStokes_surf, vStokes_surf
+      real(kind=RKIND) :: wvSumUp, wvSumDn,wuSumUp, wuSumDn
 
       real(kind=RKIND),dimension(nVertLevels,nCells) :: Swumd
       real(kind=RKIND),dimension(nVertLevels,nCells) :: tauw3, tau_tracer, tauVel, tauvVel
@@ -240,10 +241,18 @@ module ocn_adc_mixing_fused
 !                Calculate Stokes drift at vertical midpoint of cells
                  uStokesm(k,iCell) = uStokes_surf*EXP(zm(k,iCell)/stokes_depth)
                  vStokesm(k,iCell) = vStokes_surf*EXP(zm(k,iCell)/stokes_depth)
+                !addding depth avg mean for UStokes and Vstokes
+                 !uStokesm(k,iCell) = uStokes_surf*stokes_depth* &
+                 !                    (EXP(zm(k+1,iCell)/stokes_depth)-EXP(zm(k,iCell)/stokes_depth)) &
+                 !                    / (zm(k+1,iCell)-zm(k,iCell))      
+                 !VStokesm(k,iCell) = vStokes_surf*stokes_depth* &
+                 !                      (EXP(zm(k+1,iCell)/stokes_depth)-EXP(zm(k,iCell)/stokes_depth)) &
+                 !                      / (zm(k+1,iCell)-zm(k,iCell))
+              ! changing    
                  if (uvel(k,iCell)==0.0_RKIND) then
                         uvel(k,iCell) = -uStokesm(k,iCell)
                         vvel(k,iCell) = -vStokesm(k,iCell)
-                endif       
+                 endif       
               enddo
 
               do k=1,3
@@ -592,7 +601,7 @@ module ocn_adc_mixing_fused
 
                  w2tend2(k,iCell) = (McMid(k-1,iCell)*(1.0_RKIND - 2.0_RKIND* &
                    areaFractionMid(k-1,iCell))*wumdMid(k-1,iCell)**2.0_RKIND - McMid(k,iCell)* &
-                   (1.0_RKIND - 2.0_RKIND*areaFractionMid(k,iCell))*wumdMid(k,iCell)**2.0_RKIND) / dzmid
+                   (1.0_RKIND - 2.0_RKIND*areaFractionMid(k,iCell))*wumdMid(k,iCell)**2.0_RKIND) / dzmid   
 
                  w2tend3(k,iCell) = tauvVel(k,iCell)*(u2(i1,k,iCell) + v2(i1,k,iCell) &
                  -2.0_RKIND*w2(i1,k,iCell))/3.0_RKIND + (1.0_RKIND/3.0_RKIND*alpha_1 - &
@@ -1046,10 +1055,19 @@ module ocn_adc_mixing_fused
                  wt_spsU(k,iCell) =  -KhU(k,iCell)*Tz
                  ws_spsU(k,iCell) =  -KhU(k,iCell)*Sz
                  
+                 !adding sps terms for uw vw
+                 wu_spsU(k,iCell) = -KmU(k,iCell)*Uz
+                 wv_spsU(k,iCell) = -KmU(k,iCell)*Vz
+
                  KmD(k,iCell) = 0.1_RKIND*lenspsD(k,iCell)*sqrt( KspsD(i1,k,iCell) )
                  KhD(k,iCell) = ( 1.0_RKIND+2.0_RKIND*lenspsD(k,iCell)/dz)*KmD(k,iCell)
                  wt_spsD(k,iCell) = -KhD(k,iCell)*Tz
                  ws_spsD(k,iCell) = -KhD(k,iCell)*Sz
+
+
+                 !adding sps terms for uw vw
+                 wu_spsD(k,iCell) = -KmD(k,iCell)*Uz
+                 wv_spsD(k,iCell) = -KmD(k,iCell)*Vz
 
                  if(k==2) then
                     Cval = 3.96_RKIND
@@ -1073,7 +1091,7 @@ module ocn_adc_mixing_fused
                  endif
 
                  if(k==2) then
-                    Cval = 3.96_RKIND
+                    Cval = 3.96_RKIND 
                  else
                     Cval = (0.19_RKIND+0.51_RKIND*lenspsD(k,iCell)/dz)
                  endif
@@ -1240,11 +1258,30 @@ module ocn_adc_mixing_fused
               do k=1,nVertLevels
                  utemp = uvel(k,iCell)
                  vtemp = vvel(k,iCell)
-                 uvel(k,iCell) = uvel(k,iCell) - dt_small*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) /  &
-                   (ze(k,iCell) - ze(k+1,iCell)) + dt_small*fCell(iCell)*vStokes(k,iCell) !+ dt_small*fCell(iCell)*vtemp
 
-                 vvel(k,iCell) = vvel(k,iCell) - dt_small*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) /  &
-                   (ze(k,iCell) - ze(k+1,iCell)) - dt_small*fCell(iCell)*uStokes(k,iCell) !- dt_small*fCell(iCell)*utemp
+                 !adding uw vw sps terms
+
+                 wuSumUp = uw(i1,k,iCell) + areaFraction(k,iCell)*wu_spsD(k,iCell) + &
+                   (1.0_RKIND - areaFraction(k,iCell))*wu_spsU(k,iCell)
+                 wuSumDn = uw(i1,k+1,iCell) + areaFraction(k+1,iCell)*wu_spsD(k+1,iCell) + &
+                   (1.0_RKIND - areaFraction(k+1,iCell))*wu_spsU(k+1,iCell)
+                 wvSumUp = vw(i1,k,iCell) + areaFraction(k,iCell)*wv_spsD(k,iCell) + &
+                   (1.0_RKIND - areaFraction(k,iCell))*wv_spsU(k,iCell)
+                 wvSumDn = vw(i1,k+1,iCell) + areaFraction(k+1,iCell)*wv_spsD(k+1,iCell) + &
+                   (1.0_RKIND - areaFraction(k+1,iCell))*wv_spsU(k+1,iCell)
+
+
+                uvel(k,iCell) = uvel(k,iCell) - dt_small*(wuSumUp - wuSumDn)/ &
+                               (ze(k,iCell) - ze(k+1,iCell)) + dt_small*fCell(iCell)*vStokes(k,iCell)
+
+                vvel(k,iCell) = vvel(k,iCell) - dt_small*(wvSumUp - wvSumDn)/ &
+                               (ze(k,iCell) - ze(k+1,iCell)) + dt_small*fCell(iCell)*uStokes(k,iCell)
+
+                ! uvel(k,iCell) = uvel(k,iCell) - dt_small*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) /  &
+                 !  (ze(k,iCell) - ze(k+1,iCell)) + dt_small*fCell(iCell)*vStokes(k,iCell) !+ dt_small*fCell(iCell)*vtemp
+
+                 !vvel(k,iCell) = vvel(k,iCell) - dt_small*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) /  &
+                 !  (ze(k,iCell) - ze(k+1,iCell)) - dt_small*fCell(iCell)*uStokes(k,iCell) !- dt_small*fCell(iCell)*utemp
                  
                  wtSumUp = wt(i1,k,iCell) + areaFraction(k,iCell)*wt_spsD(k,iCell) + &
                    (1.0_RKIND - areaFraction(k,iCell))*wt_spsU(k,iCell)

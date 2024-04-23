@@ -58,7 +58,7 @@ module ocn_turbulence
                        KmD, wt_spsU, wt_spsD, ws_spsU, ws_spsD, uw2,  &
                        vw2, u2w, v2w, w2t, w2s, wts, uvw, uwt, vwt,   &
                        uws, vws, ws2, wt2, areaFraction, Entrainment,        &
-                       Detrainment, tumd, sumd, wumd, Mc
+                       Detrainment, tumd, sumd, wumd, Mc, wu_spsU, wu_spsD, wv_spsU, wv_spsD
 
    real(kind=RKIND), public, dimension(:,:), allocatable :: w2tend1, w2tend2, w2tend3, &
                        w2tend4, w2tend5, w2tend6, w2tend7, wttend1, wttend2,   &
@@ -113,7 +113,8 @@ module ocn_turbulence
                        KmDTmp, wt_spsUTmp, wt_spsDTmp, ws_spsUTmp, ws_spsDTmp, uw2Tmp,  &
                        vw2Tmp, u2wTmp, v2wTmp, w2tTmp, w2sTmp, wtsTmp, uvwTmp, uwtTmp, vwtTMP,   &
                        uwsTmp, vwsTmp, ws2Tmp, wt2Tmp, areaFractionTmp, EntrainmentTmp,        &
-                       DetrainmentTmp, tumdTmp, sumdTmp, wumdTmp, McTmp, lendnTmp, lenupTmp
+                       DetrainmentTmp, tumdTmp, sumdTmp, wumdTmp, McTmp, lendnTmp, lenupTmp, &  
+                       wu_spsUTmp, wu_spsDTmp, wv_spsUTmp, wv_spsDTmp
 
    real(kind=RKIND), dimension(:,:), pointer :: w2tend1Tmp, w2tend2Tmp, w2tend3Tmp,  &
                        w2tend4Tmp, w2tend5Tmp, w2tend6Tmp, w2tend7Tmp, wttend1Tmp,   &
@@ -205,6 +206,10 @@ module ocn_turbulence
       call mpas_pool_get_array(adcDiagnosticsPool, 'wt_spsD', wt_spsDTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'ws_spsU', ws_spsUTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'ws_spsD', ws_spsDTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'wu_spsU', wu_spsUTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'wu_spsD', wu_spsDTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'wv_spsU', wv_spsUTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'wv_spsD', wv_spsDTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'uw2', uw2Tmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'vw2', vw2Tmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'u2w', u2wTmp)
@@ -235,6 +240,8 @@ module ocn_turbulence
       allocate( KmU( nVertLevelsP1, nCells), KmD( nVertLevelsP1, nCells))
       allocate( wt_spsU( nVertLevelsP1, nCells), wt_spsD( nVertLevelsP1, nCells))
       allocate( ws_spsU( nVertLevelsP1, nCells), ws_spsD( nVertLevelsP1, nCells))
+      allocate( wu_spsU( nVertLevelsP1, nCells), wu_spsD( nVertLevelsP1, nCells))
+      allocate( wv_spsU( nVertLevelsP1, nCells), wv_spsD( nVertLevelsP1, nCells))
       allocate( uw2( nVertLevels, nCells ), vw2( nVertLevels, nCells))
       allocate( u2w( nVertLevels, nCells ), v2w( nVertLevels, nCells ))
       allocate( w2t( nVertLevels, nCells ), w2s( nVertLevels, nCells ))
@@ -263,6 +270,10 @@ module ocn_turbulence
       wt_spsD = wt_spsDTmp
       ws_spsU = ws_spsUTmp
       ws_spsD = ws_spsDTmp
+      wu_spsU = wu_spsUTmp
+      wu_spsD = wu_spsDTmp
+      wv_spsU = wv_spsUTmp
+      wv_spsD = wv_spsDTmp
       uw2 = uw2Tmp
       vw2 = vw2Tmp
       u2w = u2wTmp
@@ -745,7 +756,8 @@ module ocn_turbulence
                        KmDTmp, wt_spsUTmp, wt_spsDTmp, ws_spsUTmp, ws_spsDTmp, uw2Tmp,  &
                        vw2Tmp, u2wTmp, v2wTmp, w2tTmp, w2sTmp, wtsTmp, uvwTmp, uwtTmp, vwtTMP,   &
                        uwsTmp, vwsTmp, ws2Tmp, wt2Tmp, areaFractionTmp, EntrainmentTmp,        &
-                       DetrainmentTmp, tumdTmp, sumdTmp, wumdTmp, McTmp, lendnTmp, lenupTmp
+                       DetrainmentTmp, tumdTmp, sumdTmp, wumdTmp, McTmp,lendnTmp, lenupTmp, & 
+                       wu_spsUTmp, wu_spsDTmp, wv_spsUTmp, wv_spsDTmp
 
    real(kind=RKIND), dimension(:,:), pointer :: w2tend1Tmp, w2tend2Tmp, w2tend3Tmp,  &
                        w2tend4Tmp, w2tend5Tmp, w2tend6Tmp, w2tend7Tmp, wttend1Tmp,   &
@@ -957,6 +969,10 @@ module ocn_turbulence
       call mpas_pool_get_array(adcDiagnosticsPool, 'wt_spsD', wt_spsDTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'ws_spsU', ws_spsUTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'ws_spsD', ws_spsDTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'wu_spsU', wu_spsUTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'wu_spsD', wu_spsDTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'wv_spsU', wv_spsUTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'wv_spsD', wv_spsDTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'uw2', uw2Tmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'vw2', vw2Tmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'u2w', u2wTmp)
@@ -996,6 +1012,10 @@ module ocn_turbulence
       wt_spsDTmp = wt_spsD
       ws_spsUTmp = ws_spsU
       ws_spsDTmp = ws_spsD
+      wu_spsUTmp = wu_spsU
+      wu_spsDTmp = wu_spsD
+      wv_spsUTmp = wv_spsU
+      wv_spsDTmp = wv_spsD
       uw2Tmp = uw2
       vw2Tmp = vw2
       u2wTmp = u2w
@@ -1286,7 +1306,7 @@ module ocn_turbulence
       !$acc                   kappa_VAR,    &
       !$acc                   kappa_w3,     &
       !$acc                   iterCount,    &
-    !$acc                  KspsU,    &
+      !$acc                  KspsU,    &
       !$acc                  ze,       &
       !$acc                  zm,       &
       !$acc                  epsSPS,      &
@@ -1423,6 +1443,10 @@ module ocn_turbulence
                  wt_spsD,  &
                  ws_spsU,  &
                  ws_spsD,  &
+                 wu_spsU,  &
+                 wu_spsD,  &
+                 wv_spsU,  &
+                 wv_spsD,  &
                  uw2,      &
                  vw2,      &
                  u2w,      &

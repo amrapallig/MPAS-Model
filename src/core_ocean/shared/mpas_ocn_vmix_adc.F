@@ -523,6 +523,7 @@ contains
                 length, lenspsD, lenspsU,            &
                 KhU, KhD, KmU, KmD, lenup, lendn,    &
                 wt_spsU, wt_spsD, ws_spsU, ws_spsD,  &
+                wu_spsU, wu_spsD, wv_spsU, wv_spsD,  &
                 uw2, vw2, u2w, v2w, w2t,             &
                 w2s, wts, uvw, uwt, vwt, uws, vws,   &
                 ws2, wt2, areaFraction, Entrainment, &

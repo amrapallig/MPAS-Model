@@ -242,7 +242,19 @@
        description="subplume upward moving salinity flux"
        />
   <var name="ws_spsD" type="real" dimensions="nVertLevelsP1 nCells Time" units="m C/s"
-       description="subplume downward moving salinity flux"
+	  description="subplume downward moving salinity flux"
+       />
+  <var name="wu_spsU" type="real" dimensions="nVertLevelsP1 nCells Time" units="m C/s"
+       description="subplume upward moving u momentum flux"
+       />
+  <var name="wu_spsD" type="real" dimensions="nVertLevelsP1 nCells Time" units="m C/s"
+       description="subplume downward moving u momentum flux"
+       />
+  <var name="wv_spsU" type="real" dimensions="nVertLevelsP1 nCells Time" units="m C/s"
+       description="subplume upward moving v momentum flux"
+       />
+  <var name="wv_spsD" type="real" dimensions="nVertLevelsP1 nCells Time" units="m C/s"
+       description="subplume downward moving v momentum flux"
        />
   <var name="uw2" type="real" dimensions="nVertLevels nCells Time" units="m^3/s^3"
        description="turbulent transport of E-W momentum flux"
@@ -614,6 +626,10 @@
     <var name="wt_spsD"/>
     <var name="ws_spsU"/>
     <var name="ws_spsD"/>
+    <var name="wu_spsU"/>
+    <var name="wu_spsD"/>
+    <var name="wv_spsU"/>
+    <var name="wv_spsD"/>
     <var name="uw2"/>
     <var name="vw2"/>
     <var name="u2w"/>
