@@ -239,20 +239,20 @@ module ocn_adc_mixing_fused
                  uStokes(k,iCell) = uStokes_surf*EXP(ze(k,iCell)/stokes_depth)
                  vStokes(k,iCell) = vStokes_surf*EXP(ze(k,iCell)/stokes_depth)
 !                Calculate Stokes drift at vertical midpoint of cells
-                 uStokesm(k,iCell) = uStokes_surf*EXP(zm(k,iCell)/stokes_depth)
-                 vStokesm(k,iCell) = vStokes_surf*EXP(zm(k,iCell)/stokes_depth)
+                 !uStokesm(k,iCell) = uStokes_surf*EXP(zm(k,iCell)/stokes_depth)
+                 !vStokesm(k,iCell) = vStokes_surf*EXP(zm(k,iCell)/stokes_depth)
                 !addding depth avg mean for UStokes and Vstokes
-                 !uStokesm(k,iCell) = uStokes_surf*stokes_depth* &
-                 !                    (EXP(zm(k+1,iCell)/stokes_depth)-EXP(zm(k,iCell)/stokes_depth)) &
-                 !                    / (zm(k+1,iCell)-zm(k,iCell))      
-                 !VStokesm(k,iCell) = vStokes_surf*stokes_depth* &
-                 !                      (EXP(zm(k+1,iCell)/stokes_depth)-EXP(zm(k,iCell)/stokes_depth)) &
-                 !                      / (zm(k+1,iCell)-zm(k,iCell))
+                 uStokesm(k,iCell) = uStokes_surf*stokes_depth* &
+                                     (EXP(zm(k+1,iCell)/stokes_depth)-EXP(zm(k,iCell)/stokes_depth)) &
+                                     / (zm(k+1,iCell)-zm(k,iCell))      
+                 VStokesm(k,iCell) = vStokes_surf*stokes_depth* &
+                                       (EXP(zm(k+1,iCell)/stokes_depth)-EXP(zm(k,iCell)/stokes_depth)) &
+                                       / (zm(k+1,iCell)-zm(k,iCell))
               ! changing    
-                 if (uvel(k,iCell)==0.0_RKIND) then
-                        uvel(k,iCell) = -uStokesm(k,iCell)
-                        vvel(k,iCell) = -vStokesm(k,iCell)
-                 endif       
+               !  if (uvel(k,iCell)==0.0_RKIND) then
+               !         uvel(k,iCell) = -uStokesm(k,iCell)
+               !         vvel(k,iCell) = -vStokesm(k,iCell)
+               !  endif       
               enddo
 
               do k=1,3
@@ -1272,13 +1272,14 @@ module ocn_adc_mixing_fused
 
 
                 uvel(k,iCell) = uvel(k,iCell) - dt_small*(wuSumUp - wuSumDn)/ &
-                               (ze(k,iCell) - ze(k+1,iCell)) + dt_small*fCell(iCell)*vStokes(k,iCell)
+                               (ze(k,iCell) - ze(k+1,iCell))+dt_small*fCell(iCell)*vStokesm(k,iCell)
 
                 vvel(k,iCell) = vvel(k,iCell) - dt_small*(wvSumUp - wvSumDn)/ &
-                               (ze(k,iCell) - ze(k+1,iCell)) - dt_small*fCell(iCell)*uStokes(k,iCell)
+                               (ze(k,iCell) - ze(k+1,iCell))-dt_small*fCell(iCell)*uStokesm(k,iCell)
 
+                 
                 ! uvel(k,iCell) = uvel(k,iCell) - dt_small*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) /  &
-                 !  (ze(k,iCell) - ze(k+1,iCell)) + dt_small*fCell(iCell)*vStokes(k,iCell) !+ dt_small*fCell(iCell)*vtemp
+                !   (ze(k,iCell) - ze(k+1,iCell)) + dt_small*fCell(iCell)*vStokes(k,iCell) !+ dt_small*fCell(iCell)*vtemp
 
                  !vvel(k,iCell) = vvel(k,iCell) - dt_small*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) /  &
                  !  (ze(k,iCell) - ze(k+1,iCell)) - dt_small*fCell(iCell)*uStokes(k,iCell) !- dt_small*fCell(iCell)*utemp
