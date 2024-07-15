@@ -181,7 +181,7 @@ module ocn_adc_mixing_fused
       real(kind=RKIND) :: uStokes_surf, vStokes_surf
       real(kind=RKIND) :: wvSumUp, wvSumDn,wuSumUp, wuSumDn
 
-      real(kind=RKIND),dimension(nVertLevels,nCells) :: Swumd
+      real(kind=RKIND),dimension(nVertLevels,nCells) :: Swumd, uStokesm_depth_av, vStokesm_depth_av
       real(kind=RKIND),dimension(nVertLevels,nCells) :: tauw3, tau_tracer, tauVel, tauvVel
       real(kind=RKIND),dimension(nVertLevels,nCells) :: uStokes, vStokes, uStokesm, vStokesm
       real(kind=RKIND),dimension(nVertLevels,nCells) :: areaFractionMid, tumdMid, McMid, wumdMid, sumdMid
@@ -239,16 +239,30 @@ module ocn_adc_mixing_fused
                  uStokes(k,iCell) = uStokes_surf*EXP(ze(k,iCell)/stokes_depth)
                  vStokes(k,iCell) = vStokes_surf*EXP(ze(k,iCell)/stokes_depth)
 !                Calculate Stokes drift at vertical midpoint of cells
-                 !uStokesm(k,iCell) = uStokes_surf*EXP(zm(k,iCell)/stokes_depth)
-                 !vStokesm(k,iCell) = vStokes_surf*EXP(zm(k,iCell)/stokes_depth)
+                 uStokesm(k,iCell) = uStokes_surf*EXP(zm(k,iCell)/stokes_depth)
+                 vStokesm(k,iCell) = vStokes_surf*EXP(zm(k,iCell)/stokes_depth)
                 !addding depth avg mean for uStokes and vStokes
-                 uStokesm(k,iCell) = uStokes_surf*stokes_depth* &
-                                     (EXP(ze(k+1,iCell)/stokes_depth)-EXP(ze(k,iCell)/stokes_depth)) &
-                                     / (ze(k+1,iCell)-ze(k,iCell))      
-                 vStokesm(k,iCell) = vStokes_surf*stokes_depth* &
-                                       (EXP(ze(k+1,iCell)/stokes_depth)-EXP(ze(k,iCell)/stokes_depth)) &
-                                       / (ze(k+1,iCell)-ze(k,iCell))
-              ! changing    
+                 !uStokesm(k,iCell) = uStokes_surf*stokes_depth* &
+                 !                    (EXP(ze(k+1,iCell)/stokes_depth)-EXP(ze(k,iCell)/stokes_depth)) &
+                 !                    / (ze(k+1,iCell)-ze(k,iCell))      
+                 !vStokesm(k,iCell) = vStokes_surf*stokes_depth* &
+                 !                      (EXP(ze(k+1,iCell)/stokes_depth)-EXP(ze(k,iCell)/stokes_depth)) &
+                 !                      / (ze(k+1,iCell)-ze(k,iCell))
+
+                 !Renaming depth averge uStokes and vStokes
+                 uStokesm_depth_av(k,iCell) = uStokes_surf*stokes_depth* &
+                                        (EXP(ze(k+1,iCell)/stokes_depth)-EXP(ze(k,iCell)/stokes_depth)) &
+                                         / (ze(k+1,iCell)-ze(k,iCell))
+
+
+                vStokesm_depth_av(k,iCell) = vStokes_surf*stokes_depth* &
+                                        (EXP(ze(k+1,iCell)/stokes_depth)-EXP(ze(k,iCell)/stokes_depth)) &
+                                          / (ze(k+1,iCell)-ze(k,iCell))
+
+
+
+
+! changing    
                !  if (uvel(k,iCell)==0.0_RKIND) then
                !         uvel(k,iCell) = -uStokesm(k,iCell)
                !         vvel(k,iCell) = -vStokesm(k,iCell)
@@ -1272,10 +1286,10 @@ module ocn_adc_mixing_fused
 
 
                 uvel(k,iCell) = uvel(k,iCell) - dt_small*(wuSumUp - wuSumDn)/ &
-                               (ze(k,iCell) - ze(k+1,iCell))+dt_small*fCell(iCell)*vStokesm(k,iCell)
+                               (ze(k,iCell) - ze(k+1,iCell))+dt_small*fCell(iCell)*vStokesm_depth_av(k,iCell)
 
                 vvel(k,iCell) = vvel(k,iCell) - dt_small*(wvSumUp - wvSumDn)/ &
-                               (ze(k,iCell) - ze(k+1,iCell))-dt_small*fCell(iCell)*uStokesm(k,iCell)
+                               (ze(k,iCell) - ze(k+1,iCell))-dt_small*fCell(iCell)*uStokesm_depth_av(k,iCell)
 
                  
                 ! uvel(k,iCell) = uvel(k,iCell) - dt_small*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) /  &
