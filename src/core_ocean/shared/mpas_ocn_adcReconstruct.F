@@ -339,7 +339,7 @@ module ocn_adc_mixing_fused
                       w2(i1,k+1,iCell))))
                     d_sqrt_wp2_dz = (sqrt(w2(i1,k,iCell)) - sqrt(w2(i1,k+1,iCell))) / &
                       (ze(k,iCell) - ze(k+1,iCell))
-                    w3tend6(1,iCell) = min(max(-config_adc_splat_tend_max, -w3(i1,k,iCell)*         &
+                    w3tend6(k,iCell) = min(max(-config_adc_splat_tend_max, -w3(i1,k,iCell)*         &
                       config_adc_splat_wp2_val*tau_sfc*d_sqrt_wp2_dz**2), &
                       config_adc_splat_tend_max)
                  end do
@@ -490,7 +490,7 @@ module ocn_adc_mixing_fused
 
                  tauw3(k,iCell) = C_mom_w3*KE / (1.0E-15_RKIND + sqrt(2.0_RKIND)*lenAv)
 
-                 wumdav = wumdMid(k,ICell)
+                 wumdav = wumdMid(k,iCell)
                  sigav = areaFractionMid(k,iCell)
                  Mcav = McMid(k,iCell)
 
