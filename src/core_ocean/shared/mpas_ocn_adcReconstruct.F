@@ -1251,6 +1251,7 @@ module ocn_adc_mixing_fused
               do k=1,nVertLevels
                  w3check = (w2(i2,k,iCell) + w2(i2,k+1,iCell))**1.5_RKIND
                  if(w3check < 3e-14_RKIND) w3check = 1.0_RKIND
+                 !my changes: 0.0_RKIND added to force w3 to be zero if positive  
                  w3(i2,k,iCell) = max(-w3check,min(0.0_RKIND, (w3(i1,k,iCell) + dt_small*(Cw3 * w3tend(i3_f,k,iCell) + &
                    Cw2 * w3tend(i2_f,k,iCell) + Cw1 * w3tend(i1_f,k,iCell))) / &
                    (1.0_RKIND + 0.0_RKIND*dt_small*tauw3(k,iCell)),w3check))
