@@ -838,7 +838,7 @@ module ocn_adc_mixing_fused
 !      Sum the above tendency terms to find the total uw tendency.
                  uwtend(i3_f,k,iCell) = uwtend1(k,iCell) + uwtend2(k,iCell) + &
                    uwtend3(k,iCell) + uwtend4(k,iCell) + uwtend5(k,iCell) + uwtend6(k,iCell)  &
-                   -30.0E-8_RKIND * 0.3_RKIND ** (1.0_RKIND )* exp(1.0_RKIND*zm(k,iCell)/4.8_RKIND)     
+                   -30.0E-8_RKIND * La_t ** (1.0_RKIND )* exp(1.0_RKIND*zm(k,iCell)/stokes_depth)     
 
                  if (config_adc_truncate_tend) then
                     uwtend(i3_f,k,iCell) = FLOAT (INT(uwtend(i3_f,k,iCell) * adcRound &
@@ -880,7 +880,7 @@ module ocn_adc_mixing_fused
 !      Sum the above tendency terms to find the total vw tendency.
                  vwtend(i3_f,k,iCell) = vwtend1(k,iCell) + vwtend2(k,iCell) + &
                    vwtend3(k,iCell) + vwtend4(k,iCell) + vwtend5(k,iCell) + vwtend6(k,iCell) &   
-                   -1.0E-8_RKIND * 0.3_RKIND ** (1.0_RKIND)* exp(1.0_RKIND*zm(k,iCell)/4.8_RKIND)
+                   -1.0E-8_RKIND * La_t ** (1.0_RKIND)* exp(1.0_RKIND*zm(k,iCell)/stokes_depth)
 
                  if (config_adc_truncate_tend) then
                     vwtend(i3_f,k,iCell) = FLOAT (INT(vwtend(i3_f,k,iCell) * adcRound &
@@ -904,7 +904,7 @@ module ocn_adc_mixing_fused
                    - (uw(i1,k,iCell)*Vz + vw(i1,k,iCell)*Uz) & ! shear production
                    + kappa_VAR*(uv(i1,k-1,iCell) - uv(i1,k+1,iCell)) / &
                    (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND  & ! dissipation
-                   + 2.0E-8_RKIND * 0.3_RKIND ** (3.0_RKIND)* exp(2.0_RKIND*zm(k,iCell)/4.8_RKIND)
+                   + 2.0E-8_RKIND * La_t ** (3.0_RKIND)* exp(2.0_RKIND*zm(k,iCell)/stokes_depth)
 
 !      Truncate the uv tendency term if the truncation flag is switched on
                  if (config_adc_truncate_tend) then
@@ -944,7 +944,8 @@ module ocn_adc_mixing_fused
                  u2tend(i3_f,k,iCell) = u2tend1(k,iCell) + u2tend2(k,iCell) + &
                    u2tend3(k,iCell) + u2tend4(k,iCell) + u2tend5(k,iCell) + &
                    u2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*u2(i1,k,iCell)/3.0_RKIND  &  
-                  - 1.5E-8_RKIND * 0.3_RKIND ** (3.0_RKIND)*exp((5.0_RKIND/4.0_RKIND)*zm(k,iCell)/4.8_RKIND)
+                  - 1.5E-8_RKIND * La_t ** (3.0_RKIND)*exp((5.0_RKIND/4.0_RKIND)*zm(k,iCell)/stokes_depth)
+
 
                  if (config_adc_truncate_tend) then
                     u2tend(i3_f,k,iCell) = FLOAT (INT(u2tend(i3_f,k,iCell) * adcRound &
@@ -983,7 +984,7 @@ module ocn_adc_mixing_fused
                  v2tend(i3_f,k,iCell) = v2tend1(k,iCell) + v2tend2(k,iCell) + &
                    v2tend3(k,iCell) + v2tend4(k,iCell) + v2tend5(k,iCell) + &
                    v2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*v2(i1,k,iCell)/3.0_RKIND &  
-                     + 12.0E-8_RKIND * 0.3_RKIND ** (3.0_RKIND)* exp(5.0_RKIND*zm(k,iCell)/4.8_RKIND)
+                     + 12.0E-8_RKIND * La_t ** (3.0_RKIND)* exp(5.0_RKIND*zm(k,iCell)/stokes_depth)
                  if (config_adc_truncate_tend) then
                     v2tend(i3_f,k,iCell) = FLOAT (INT(v2tend(i3_f,k,iCell) * adcRound &
                       + 0.5_RKIND)) / adcRound
