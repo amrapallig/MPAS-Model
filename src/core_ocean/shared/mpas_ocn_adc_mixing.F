@@ -543,7 +543,7 @@ module ocn_adc_mixing
     real,dimension(nVertLevels+1,nCells) :: wttend, wstend, uwtend, vwtend, u2tend, v2tend, &
       uttend, vttend, ustend, vstend, uvtend
     real :: B, Kps, Kpsp1, diff, lenav, Uz, Vz, Tz, Sz, sigav, sumdav
-    real :: dz, dzmid, tumdav, Ksps
+    real :: dz, dzmid, tumdav, Ksps, uumdav, vumdav
     integer :: iCell, k
 
     do iCell=1,nCells

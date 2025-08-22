@@ -524,10 +524,10 @@ contains
                 KhU, KhD, KmU, KmD, lenup, lendn,    &
                 wt_spsU, wt_spsD, ws_spsU, ws_spsD,  &
                 wu_spsU, wu_spsD, wv_spsU, wv_spsD,  &
-                uw2, vw2, u2w, v2w, w2t,             &
+                uw2, vw2, u2w, v2w, w2t,        &
                 w2s, wts, uvw, uwt, vwt, uws, vws,   &
                 ws2, wt2, areaFraction, Entrainment, &
-                Detrainment, tumd, sumd, wumd,       &
+                Detrainment, tumd, sumd, wumd, uumd, vumd, &
                 w2tend1, w2tend2, w2tend3, w2tend4,  &
                 w2tend5, w2tend6, w2tend7, w3tend1,  &
                 w3tend2, w3tend3, w3tend4, w3tend5,  &

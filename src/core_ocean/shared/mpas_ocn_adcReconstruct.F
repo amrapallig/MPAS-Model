@@ -58,7 +58,7 @@ module ocn_adc_mixing_fused
       real (kind=RKIND), dimension(nVertLevels) :: B, Bup, Bdn
       real (kind=RKIND), dimension(nVertLevels+1) :: tedge, sedge, KEsps, tke, BupEdge, BdnEdge, BEdge
       real (kind=RKIND), dimension(nVertLevels+1) :: alphaEdge, betaEdge
-      real (kind=RKIND) :: sigav, tumdav, sumdav, Tup, Tdn, Sup, Sdn
+      real (kind=RKIND) :: sigav, tumdav, sumdav, Tup, Tdn, Sup, Sdn, uumdav, vumdav
       real (kind=RKIND) :: sumv, sumv0
       real (kind=RKIND), parameter :: refT = 15.0_RKIND, refS = 35.0_RKIND, minlen = 0.55_RKIND
 
@@ -169,7 +169,8 @@ module ocn_adc_mixing_fused
       real(kind=RKIND) :: Sw, St, Ss, Eav, Dav, sigav, sigavp1, wumdAv, tumdAv, sumdAv, wumdAvp1, tumdAvp1, sumdAvp1
       real(kind=RKIND) :: Swup, KspsUav, KspsDav, KspsUavp1, KspsDavp1, KE, Mcav, lenav,u2av,v2av,w2av
       real(kind=RKIND) :: w2tTemp, w2tCheck, w2sTemp, w2sCheck, w3temp, w3check2, w3check, mval, KEsps
-      real(kind=RKIND) :: Uz, Vz, Ustz, Vstz, dz
+      real(kind=RKIND) :: Uz, Vz, Ustz, Vstz, dz, uw2Temp, vw2Temp, u2wTemp, v2wTemp
+      real(kind=RKIND) :: uvwTemp, uwtTemp, vwtTemp, uwsTemp, vwsTemp
 
       real(kind=RKIND) :: invLen, l, len1, len2, lenmax, integrandTop, integrandBot
       real(kind=RKIND) :: len0, len2_1, len2_2, sfcBuoy, lengthT, bvfT
@@ -178,14 +179,14 @@ module ocn_adc_mixing_fused
       real(kind=RKIND) :: B, Cval, diff, wtav, dzmid, Ksps, Sz, Tz, w4k, w4kp1, w2k, w2kp1
       real(kind=RKIND) :: lareaFraction, wstar, Q, w3av, tempMoment, frictionVelocity
       real(kind=RKIND) :: sfcFrictionVelocitySquared, wtSumUp, wtSumDn, wsSumUp, wsSumDn
-      real(kind=RKIND) :: uStokes_surf, vStokes_surf
-      real(kind=RKIND) :: wvSumUp, wvSumDn,wuSumUp, wuSumDn
+      real(kind=RKIND) :: uStokes_surf, vStokes_surf, radian
+      real(kind=RKIND) :: wvSumUp, wvSumDn,wuSumUp, wuSumDn, uumdav,vumdav
 
       real(kind=RKIND),dimension(nVertLevels,nCells) :: Swumd, uStokesm_depth_av, vStokesm_depth_av
       real(kind=RKIND),dimension(nVertLevels,nCells) :: tauw3, tau_tracer, tauVel, tauvVel
       real(kind=RKIND),dimension(nVertLevels,nCells) :: uStokes, vStokes, uStokesm, vStokesm
       real(kind=RKIND),dimension(nVertLevels,nCells) :: areaFractionMid, tumdMid, McMid, wumdMid, sumdMid
-
+      real(kind=RKIND),dimension(nVertLevels,nCells) :: uumdMid, vumdMid  
       real(kind=RKIND) :: SwU, SwD, tau_sfc, d_sqrt_wp2_dz, tp2, sp2, min_wp2_sfc_val, wp2_splat_sfc_correction
       real(kind=RKIND) :: min_wps_sfc_val
 
@@ -211,6 +212,8 @@ module ocn_adc_mixing_fused
 
               tumd(1,iCell) = 0.0_RKIND
               wumd(1,iCell) = 0.0_RKIND
+              uumd(1,iCell) = 0.0_RKIND
+              vumd(1,iCell) = 0.0_RKIND
               areaFraction(1,iCell) = 0.5_RKIND
               Mc(1,iCell) = 0.0_RKIND
               w2t(1,iCell) = -0.3_RKIND*wstar * wtsfc(iCell)
@@ -223,10 +226,13 @@ module ocn_adc_mixing_fused
               ! Initialize Stokes drift surface values as zero, overwrite these if config_adc_langmuir = .True.
               uStokes_surf = 0.0_RKIND
               vStokes_surf = 0.0_RKIND
+              radian= 0.0_RKIND * (3.14159_RKIND /180.0_RKIND)
               if (config_adc_langmuir) then
-                  uStokes_surf = COS(stokes_angle)*frictionVelocity / (La_t**2.0_RKIND)
-                  vStokes_surf = SIN(stokes_angle)*frictionVelocity / (La_t**2.0_RKIND)
+                  uStokes_surf = COS(radian)*frictionVelocity / (La_t**2.0_RKIND)
+                  vStokes_surf = SIN(radian)*frictionVelocity / (La_t**2.0_RKIND)
               endif
+
+              !print *, 'radiat()', COS(radian), SIN(radian), uStokes_surf, vStokes_surf 
 
 !             Calculate exponential Stokes drift profiles from surface values & decay depth
 !             [stokes_decay_depth]. This is temporary; eventually MPAS will pass profiles
@@ -262,11 +268,11 @@ module ocn_adc_mixing_fused
 
 
 
-! changing    
-               !  if (uvel(k,iCell)==0.0_RKIND) then
-               !         uvel(k,iCell) = -uStokesm(k,iCell)
-               !         vvel(k,iCell) = -vStokesm(k,iCell)
-               !  endif       
+!changing    
+                 if (uvel(k,iCell)==0.0_RKIND) then
+                        uvel(k,iCell) = -uStokesm(k,iCell)
+                        vvel(k,iCell) = -vStokesm(k,iCell)
+                 endif       
               enddo
 
               do k=1,3
@@ -407,10 +413,15 @@ module ocn_adc_mixing_fused
 
                  tumd(k,iCell) = wt(i1,k,iCell) / (1.0E-12_RKIND + Mc(k,iCell))
                  sumd(k,iCell) = ws(i1,k,iCell) / (1.0E-12_RKIND + Mc(k,iCell))
+! AG addinf other MFC forms
+                 uumd(k,iCell) = uw(i1,k,iCell) / (1.0E-12_RKIND + Mc(k,iCell))
+                 vumd(k,iCell) = vw(i1,k,iCell) / (1.0E-12_RKIND + Mc(k,iCell))
 
                  if(w2(i1,k,iCell) <= epsilon + 1.0e-9_RKIND) then
                     tumd(k,iCell) = 0.0_RKIND
                     sumd(k,iCell) = 0.0_RKIND
+                    uumd(k,iCell) = 0.0_RKIND
+                    vumd(k,iCell) = 0.0_RKIND
                  endif
 !     redo mid quantities
                  areaFractionMid(k-1,iCell) = 0.5_RKIND*(areaFraction(k-1,iCell) + areaFraction(k,iCell))
@@ -418,12 +429,18 @@ module ocn_adc_mixing_fused
                  tumdMid(k-1,iCell) = 0.5_RKIND*(tumd(k-1,iCell) + tumd(k,iCell))
                  sumdMid(k-1,iCell) = 0.5_RKIND*(sumd(k-1,iCell) + sumd(k,iCell))
                  McMid(k-1,iCell) = 0.5_RKIND*(Mc(k-1,iCell) + Mc(k,iCell))
-              enddo
+                 !AG
+                 uumdMid(k-1,iCell) = 0.5_RKIND*(uumd(k-1,iCell) + uumd(k,iCell))
+                 vumdMid(k-1,iCell) = 0.5_RKIND*(vumd(k-1,iCell) + vumd(k,iCell))
+
+           enddo
               areaFractionMid(nVertLevels,iCell) = 0.5_RKIND
               wumdMid(nVertLevels,iCell) = 0.0_RKIND
               tumdMid(nVertLevels,iCell) = 0.0_RKIND
               sumdMid(nVertLevels,iCell) = 0.0_RKIND
               McMid(nVertLevels,iCell) = 0.0_RKIND
+              uumdMid(nVertLevels,iCell) = 0.0_RKIND
+              vumdMid(nVertLevels,iCell) = 0.0_RKIND
            enddo
 
            do iCell = 1,nCells
@@ -432,10 +449,14 @@ module ocn_adc_mixing_fused
                  tumdav = 0.5_RKIND*(tumd(k,iCell) + tumd(k+1,iCell))
                  sumdav = 0.5_RKIND*(sumd(k,iCell) + sumd(k+1,iCell))
                  wumdav = 0.5_RKIND*(wumd(k,iCell) + wumd(k+1,iCell))
+                 uumdav = 0.5_RKIND*(uumd(k,iCell) + uumd(k+1,iCell))
+                 vumdav = 0.5_RKIND*(vumd(k,iCell) + vumd(k+1,iCell))
                  sigav = areaFractionMid(k,iCell)
                  tumdav = tumdMid(k,iCell)
                  wumdav = wumdMid(k,iCell)
                  sumdav = sumdMid(k,iCell)
+                 uumdav = uumdMid(k,iCell)
+                 vumdav = vumdMid(k,iCell)
                  w2tTemp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND - 2.0_RKIND*sigav)*wumdav**2.0_RKIND*tumdav
                  w2tCheck = sigav*(1.0_RKIND - sigav)*sqrt(1.0_RKIND - 3.0_RKIND*sigav + 3.0_RKIND*sigav**2)* &
                    wumdav**2.0_RKIND*tumdav
@@ -478,6 +499,8 @@ module ocn_adc_mixing_fused
                  wumdav = 0.5_RKIND*(wumd(k,iCell) + wumd(k+1,iCell))
                  tumdav = 0.5_RKIND*(tumd(k,iCell) + tumd(k+1,iCell))
                  sumdav = 0.5_RKIND*(sumd(k,iCell) + sumd(k+1,iCell))
+                 uumdav = 0.5_RKIND*(uumd(k,iCell) + uumd(k+1,iCell))
+                 vumdav = 0.5_RKIND*(vumd(k,iCell) + vumd(k+1,iCell))
                  Mcav = 0.5_RKIND*(Mc(k,iCell) + Mc(k+1,iCell))
                  lenav = 0.5_RKIND*(length(k,iCell) + length(k+1,iCell))
                  KE = sqrt(0.5_RKIND*(u2av+v2av+w2av))
@@ -561,7 +584,34 @@ module ocn_adc_mixing_fused
                  uws(k,iCell) = -diff*(us(i1,k,iCell) - us(i1,k+1,iCell)) / dz
                  vws(k,iCell) = -diff*(vs(i1,k,iCell) - vs(i1,k+1,iCell)) / dz
 
-              enddo             !nVertLevels
+              
+!!!! changeing to MFC representation
+
+                ! uw2Temp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*wumdav**2.0_RKIND*uumdav
+                ! vw2Temp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*wumdav**2.0_RKIND*vumdav
+                ! u2wTemp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*uumdav**2.0_RKIND*wumdav
+                ! v2wTemp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*vumdav**2.0_RKIND*wumdav
+                ! uvwTemp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*wumdav*vumdav*uumdav
+                 
+                ! uwtTemp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*wumdav*uumdav*tumdav
+                ! vwtTemp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*wumdav*vumdav*tumdav
+                ! uwsTemp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*wumdav*uumdav*sumdav
+                ! vwsTemp = -sigav*(1.0_RKIND - sigav)*(1.0_RKIND -2.0_RKIND*sigav)*wumdav*vumdav*sumdav
+
+                ! uw2(k,iCell) = uw2Temp
+                ! vw2(k,iCell) = vw2Temp
+                ! u2w(k,iCell) = u2wTemp
+                ! v2w(k,iCell) = v2wTemp
+                ! uvw(k,iCell) = uvwTemp
+
+                 !uwt(k,iCell) = uwtTemp
+                 !vwt(k,iCell) = vwtTemp
+                 !uws(k,iCell) = uwsTemp
+                 !vws(k,iCell) = vwsTemp
+
+
+
+                enddo             !nVertLevels
            enddo                !nCells
 
 !     next all second order moment tendencies also apply tendencies
@@ -787,8 +837,8 @@ module ocn_adc_mixing_fused
                  uwtend6(k,iCell) = -u2(i1,k,iCell)*Ustz - uv(i1,k,iCell)*Vstz
 !      Sum the above tendency terms to find the total uw tendency.
                  uwtend(i3_f,k,iCell) = uwtend1(k,iCell) + uwtend2(k,iCell) + &
-                   uwtend3(k,iCell) + uwtend4(k,iCell) + uwtend5(k,iCell) + uwtend6(k,iCell) ! &
-                   !-15.0E-8_RKIND * 0.3_RKIND ** (1)* exp(1*zm(k,iCell)/4.8_RKIND)     
+                   uwtend3(k,iCell) + uwtend4(k,iCell) + uwtend5(k,iCell) + uwtend6(k,iCell)  &
+                   -30.0E-8_RKIND * 0.3_RKIND ** (1.0_RKIND )* exp(1.0_RKIND*zm(k,iCell)/4.8_RKIND)     
 
                  if (config_adc_truncate_tend) then
                     uwtend(i3_f,k,iCell) = FLOAT (INT(uwtend(i3_f,k,iCell) * adcRound &
@@ -829,8 +879,8 @@ module ocn_adc_mixing_fused
                  vwtend6(k,iCell) = -uv(i1,k,iCell)*Ustz - v2(i1,k,iCell)*Vstz
 !      Sum the above tendency terms to find the total vw tendency.
                  vwtend(i3_f,k,iCell) = vwtend1(k,iCell) + vwtend2(k,iCell) + &
-                   vwtend3(k,iCell) + vwtend4(k,iCell) + vwtend5(k,iCell) + vwtend6(k,iCell)   
-                   !-15.0E-8_RKIND * 0.3_RKIND ** (1)* exp(1*zm(k,iCell)/4.8_RKIND)
+                   vwtend3(k,iCell) + vwtend4(k,iCell) + vwtend5(k,iCell) + vwtend6(k,iCell) &   
+                   -1.0E-8_RKIND * 0.3_RKIND ** (1.0_RKIND)* exp(1.0_RKIND*zm(k,iCell)/4.8_RKIND)
 
                  if (config_adc_truncate_tend) then
                     vwtend(i3_f,k,iCell) = FLOAT (INT(vwtend(i3_f,k,iCell) * adcRound &
@@ -853,8 +903,8 @@ module ocn_adc_mixing_fused
                    (uw(i1,k,iCell)*Vstz + vw(i1,k,iCell)*Ustz) & ! Stokes
                    - (uw(i1,k,iCell)*Vz + vw(i1,k,iCell)*Uz) & ! shear production
                    + kappa_VAR*(uv(i1,k-1,iCell) - uv(i1,k+1,iCell)) / &
-                   (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND   ! dissipation
-                   !- 15.0E-8_RKIND * 0.3_RKIND ** (1)* exp(1*zm(k,iCell)/4.8_RKIND)
+                   (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND  & ! dissipation
+                   + 2.0E-8_RKIND * 0.3_RKIND ** (3.0_RKIND)* exp(2.0_RKIND*zm(k,iCell)/4.8_RKIND)
 
 !      Truncate the uv tendency term if the truncation flag is switched on
                  if (config_adc_truncate_tend) then
@@ -893,8 +943,8 @@ module ocn_adc_mixing_fused
 !      included implicitly in the timestepping
                  u2tend(i3_f,k,iCell) = u2tend1(k,iCell) + u2tend2(k,iCell) + &
                    u2tend3(k,iCell) + u2tend4(k,iCell) + u2tend5(k,iCell) + &
-                   u2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*u2(i1,k,iCell)/3.0_RKIND  
-                  !- 15.0E-8_RKIND * 0.3_RKIND ** (1)* exp(1*zm(k,iCell)/4.8_RKIND)
+                   u2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*u2(i1,k,iCell)/3.0_RKIND  &  
+                  - 1.5E-8_RKIND * 0.3_RKIND ** (3.0_RKIND)*exp((5.0_RKIND/4.0_RKIND)*zm(k,iCell)/4.8_RKIND)
 
                  if (config_adc_truncate_tend) then
                     u2tend(i3_f,k,iCell) = FLOAT (INT(u2tend(i3_f,k,iCell) * adcRound &
@@ -932,8 +982,8 @@ module ocn_adc_mixing_fused
 !      included implicitly in the timestepping
                  v2tend(i3_f,k,iCell) = v2tend1(k,iCell) + v2tend2(k,iCell) + &
                    v2tend3(k,iCell) + v2tend4(k,iCell) + v2tend5(k,iCell) + &
-                   v2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*v2(i1,k,iCell)/3.0_RKIND  
-                    !- 15.0E-8_RKIND * 0.3_RKIND ** (1)* exp(1*zm(k,iCell)/4.8_RKIND)
+                   v2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*v2(i1,k,iCell)/3.0_RKIND &  
+                     + 12.0E-8_RKIND * 0.3_RKIND ** (3.0_RKIND)* exp(5.0_RKIND*zm(k,iCell)/4.8_RKIND)
                  if (config_adc_truncate_tend) then
                     v2tend(i3_f,k,iCell) = FLOAT (INT(v2tend(i3_f,k,iCell) * adcRound &
                       + 0.5_RKIND)) / adcRound
@@ -1252,7 +1302,7 @@ module ocn_adc_mixing_fused
                  w3check = (w2(i2,k,iCell) + w2(i2,k+1,iCell))**1.5_RKIND
                  if(w3check < 3e-14_RKIND) w3check = 1.0_RKIND
                  !my changes: 0.0_RKIND added to force w3 to be zero if positive  
-                 w3(i2,k,iCell) = max(-w3check,min(0.0_RKIND, (w3(i1,k,iCell) + dt_small*(Cw3 * w3tend(i3_f,k,iCell) + &
+                 w3(i2,k,iCell) = max(-w3check,min( (w3(i1,k,iCell) + dt_small*(Cw3 * w3tend(i3_f,k,iCell) + &
                    Cw2 * w3tend(i2_f,k,iCell) + Cw1 * w3tend(i1_f,k,iCell))) / &
                    (1.0_RKIND + 0.0_RKIND*dt_small*tauw3(k,iCell)),w3check))
 

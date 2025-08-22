@@ -404,7 +404,7 @@ call mpas_pool_get_array(mixedLayerDepthsAMPool, 'tThreshMLD',tThreshMLD)
     type(adc_mixing_constants) :: adcConst
 
     real :: wtav, McAv, sigav, tumdav, wumdav, sumdav, wb, bld, wstar
-    real :: w2av, t2av, wsav, s2av
+    real :: w2av, t2av, wsav, s2av, uumdav, vumdav
     integer :: iCell,k
 
     do iCell=1,nCells

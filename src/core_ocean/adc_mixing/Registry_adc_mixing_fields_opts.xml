@@ -313,6 +313,12 @@
   <var name="sumd" type="real" dimensions="nVertLevelsP1 nCells Time" units="PSU"
        description="upward moving salinity - downward moving salinity"
        />
+  <var name="uumd" type="real" dimensions="nVertLevelsP1 nCells Time" units="m/s"
+       description="upward moving u-velocity - downward moving u-velocity"
+       />
+  <var name="vumd" type="real" dimensions="nVertLevelsP1 nCells Time" units="m/s"
+       description="upward moving v-velocity - downward moving v-velocity"
+       />	  
   <var name="wumd" type="real" dimensions="nVertLevelsP1 nCells Time" units="m/s"
        description="upward moving vertical velocity - downward moving (negative) vertical velocity"
        />
@@ -649,6 +655,8 @@
     <var name="Detrainment"/>
     <var name="tumd"/>
     <var name="sumd"/>
+    <var name="uumd"/>
+    <var name="vumd"/>	    
     <var name="wumd"/>
     <var name="w2tend1"/>
     <var name="w2tend2"/>

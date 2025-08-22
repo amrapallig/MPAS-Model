@@ -58,7 +58,8 @@ module ocn_turbulence
                        KmD, wt_spsU, wt_spsD, ws_spsU, ws_spsD, uw2,  &
                        vw2, u2w, v2w, w2t, w2s, wts, uvw, uwt, vwt,   &
                        uws, vws, ws2, wt2, areaFraction, Entrainment,        &
-                       Detrainment, tumd, sumd, wumd, Mc, wu_spsU, wu_spsD, wv_spsU, wv_spsD
+                       Detrainment, tumd, sumd, wumd, Mc, uumd, vumd, &
+                       wu_spsU, wu_spsD, wv_spsU, wv_spsD 
 
    real(kind=RKIND), public, dimension(:,:), allocatable :: w2tend1, w2tend2, w2tend3, &
                        w2tend4, w2tend5, w2tend6, w2tend7, wttend1, wttend2,   &
@@ -114,7 +115,7 @@ module ocn_turbulence
                        vw2Tmp, u2wTmp, v2wTmp, w2tTmp, w2sTmp, wtsTmp, uvwTmp, uwtTmp, vwtTMP,   &
                        uwsTmp, vwsTmp, ws2Tmp, wt2Tmp, areaFractionTmp, EntrainmentTmp,        &
                        DetrainmentTmp, tumdTmp, sumdTmp, wumdTmp, McTmp, lendnTmp, lenupTmp, &  
-                       wu_spsUTmp, wu_spsDTmp, wv_spsUTmp, wv_spsDTmp
+                       wu_spsUTmp, wu_spsDTmp, wv_spsUTmp, wv_spsDTmp, uumdTmp, vumdTmp
 
    real(kind=RKIND), dimension(:,:), pointer :: w2tend1Tmp, w2tend2Tmp, w2tend3Tmp,  &
                        w2tend4Tmp, w2tend5Tmp, w2tend6Tmp, w2tend7Tmp, wttend1Tmp,   &
@@ -229,6 +230,8 @@ module ocn_turbulence
       call mpas_pool_get_array(adcDiagnosticsPool, 'Detrainment', DetrainmentTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'tumd', tumdTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'sumd', sumdTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'uumd', uumdTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'vumd', vumdTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'wumd', wumdTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'Mc', McTmp)
 
@@ -252,8 +255,8 @@ module ocn_turbulence
       allocate( areaFraction( nVertLevelsP1, nCells ))
       allocate( Entrainment( nVertLevelsP1, nCells ), Detrainment( nVertLevelsP1, nCells ))
       allocate( tumd( nVertLevelsP1, nCells ), sumd( nVertLevelsP1, nCells ))
+      allocate( uumd( nVertLevelsP1, nCells ), vumd( nVertLevelsP1, nCells ))
       allocate( wumd( nVertLevelsP1, nCells ), Mc( nVertLevelsP1, nCells ))
-
       ze = zeTmp
       zm = zmTmp
       epsSPS = epsSPSTmp
@@ -293,6 +296,8 @@ module ocn_turbulence
       Detrainment = DetrainmentTmp
       tumd = tumdTmp
       sumd = sumdTmp
+      uumd = uumdTmp
+      vumd = vumdTmp
       wumd = wumdTmp
       Mc = McTmp
 
@@ -757,7 +762,7 @@ module ocn_turbulence
                        vw2Tmp, u2wTmp, v2wTmp, w2tTmp, w2sTmp, wtsTmp, uvwTmp, uwtTmp, vwtTMP,   &
                        uwsTmp, vwsTmp, ws2Tmp, wt2Tmp, areaFractionTmp, EntrainmentTmp,        &
                        DetrainmentTmp, tumdTmp, sumdTmp, wumdTmp, McTmp,lendnTmp, lenupTmp, & 
-                       wu_spsUTmp, wu_spsDTmp, wv_spsUTmp, wv_spsDTmp
+                       wu_spsUTmp, wu_spsDTmp, wv_spsUTmp, wv_spsDTmp, uumdTmp, vumdTmp 
 
    real(kind=RKIND), dimension(:,:), pointer :: w2tend1Tmp, w2tend2Tmp, w2tend3Tmp,  &
                        w2tend4Tmp, w2tend5Tmp, w2tend6Tmp, w2tend7Tmp, wttend1Tmp,   &
@@ -992,6 +997,8 @@ module ocn_turbulence
       call mpas_pool_get_array(adcDiagnosticsPool, 'Detrainment', DetrainmentTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'tumd', tumdTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'sumd', sumdTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'uumd', uumdTmp)
+      call mpas_pool_get_array(adcDiagnosticsPool, 'vumd', vumdTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'wumd', wumdTmp)
       call mpas_pool_get_array(adcDiagnosticsPool, 'Mc', McTmp)
 
@@ -1035,6 +1042,8 @@ module ocn_turbulence
       DetrainmentTmp = Detrainment
       tumdTmp = tumd
       sumdTmp = sumd
+      uumdTmp = uumd
+      vumdTmp = vumd
       wumdTmp = wumd
 
       call mpas_pool_get_array(adcTendPool, 'w2tend1', w2tend1Tmp)
@@ -1466,6 +1475,8 @@ module ocn_turbulence
                  Detrainment, &
                  tumd,        &
                  sumd,        &
+                 uumd,        &
+                 vumd,        &
                  wumd,        &
                  w2tend1,     &
                  w2tend2,     &
