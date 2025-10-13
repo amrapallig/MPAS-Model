@@ -171,6 +171,7 @@ module ocn_adc_mixing_fused
       real(kind=RKIND) :: w2tTemp, w2tCheck, w2sTemp, w2sCheck, w3temp, w3check2, w3check, mval, KEsps
       real(kind=RKIND) :: Uz, Vz, Ustz, Vstz, dz, uw2Temp, vw2Temp, u2wTemp, v2wTemp
       real(kind=RKIND) :: uvwTemp, uwtTemp, vwtTemp, uwsTemp, vwsTemp
+      real(kind=RKIND) :: uw_av, w2_av, w3_av, u2w_av, uvw_av, v2w_av, vw_av
 
       real(kind=RKIND) :: invLen, l, len1, len2, lenmax, integrandTop, integrandBot
       real(kind=RKIND) :: len0, len2_1, len2_2, sfcBuoy, lengthT, bvfT
@@ -572,8 +573,8 @@ module ocn_adc_mixing_fused
                  lenav = 0.5_RKIND*(length(k,iCell) + length(k+1,iCell))
                  diff = C_mom * sqrt(0.5_RKIND*(KE + KEp1)) * lenav
                  dz = ze(k,iCell) - ze(k+1,iCell)
-                 uw2(k,iCell) = -diff*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) / dz
-                 vw2(k,iCell) = -diff*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) / dz
+                 uw2(k,iCell) = -2.0_RKIND*diff*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) / dz
+                 vw2(k,iCell) = -2.0_RKIND*diff*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) / dz
                  u2w(k,iCell) = -diff*(u2(i1,k,iCell) - u2(i1,k+1,iCell)) / dz
                  v2w(k,iCell) = -diff*(v2(i1,k,iCell) - v2(i1,k+1,iCell)) / dz
                  uvw(k,iCell) = -diff*(uv(i1,k,iCell) - uv(i1,k+1,iCell)) / dz
@@ -610,6 +611,82 @@ module ocn_adc_mixing_fused
                  !vws(k,iCell) = vwsTemp
 
 
+! using QNA for all third order moments
+
+               !diff = C_mom * sqrt(0.5_RKIND*(KE + KEp1)) * lenav
+               !uw_av = 0.5_RKIND*(uw(i1,k,iCell) + uw(i1,k+1,iCell))
+               !w2_av = (2.0_RKIND/3.0_RKIND)*(0.5_RKIND*(KE + KEp1))
+               !w3_av = 0.5_RKIND*(w3(i1,k,iCell) + w3(i1,k+1,iCell))
+               !u2w_av= 0.5_RKIND*(u2w(k,iCell) + u2w(k+1,iCell))
+               !uw_av = 0.5_RKIND*(uw(i1,k,iCell) + uw(i1,k+1,iCell))
+               !uvw_av= 0.5_RKIND*(uvw(k,iCell) + uvw(k+1,iCell))
+               !vw_av = 0.5_RKIND*(vw(i1,k,iCell) + vw(i1,k+1,iCell))
+
+               ! uw2(k,iCell) =  - diff*(2.0_RKIND*(uw(i1,k,iCell) -uw(i1,k+1,iCell)) / dz   &
+               !                 + (uw_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz) &
+               !                 + (w3_av/w2_av)*Uz &
+               !                 + 2.0_RKIND*(u2w_av/w2_av)*Ustz &
+               !                 + 2.0_RKIND*(uvw_av/w2_av)*Vstz )
+
+               !vw2(k,iCell) = -diff*(2.0_RKIND*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) / dz) ! &
+               !                 + 2.0_RKIND*(vw_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz &
+               !                 + (w3_av/w2_av)*Vz &
+               !                 + 2.0_RKIND*(uvw_av/w2_av)*Ustz &
+               !                 + 2.0_RKIND*(v2w_av/w2_av)*Vstz )
+
+               !u2w(k,iCell) = -diff*( (u2_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz &
+               !                 + 2.0_RKIND*(uw_av/w2_av)*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) / dz &
+               !                 + 2.0_RKIND*(uw2_av/w2_av)*Uz &
+               !                 + (u3_av/w2_av)*Ustz &             
+               !                 + (u2v_av/w2_av)*Vstz )             
+
+               !v2w(k,iCell) = -diff*( (v2_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz &
+               !                 + 2.0_RKIND*(vw_av/w2_av)*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) / dz &
+               !                 + 2.0_RKIND*(vw2_av/w2_av)*Vz &
+               !                 + (uv2_av/w2_av)*Ustz &             
+               !                 + (v3_av/w2_av)*Vstz )             
+
+               !uvw(k,iCell) = -diff*( (uv_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz &
+               !                 + (uw_av/w2_av)*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) / dz &
+               !                 + (vw_av/w2_av)*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) / dz &
+               !                 + (vw2_av/w2_av)*Uz &
+               !                 + (uw2_av/w2_av)*Vz &
+               !                 + (u2v_av/w2_av)*Ustz &             
+               !                 + (uv2_av/w2_av)*Vstz )             
+
+               !diff = C_therm*sqrt(0.5_RKIND*(KE + KEp1)) * lenav
+               
+               !uwt(k,iCell) = -diff*( (uw_av/w2_av)*(wt(i1,k,iCell) - wt(i1,k+1,iCell)) / dz &
+               !                 + (ut_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz &
+               !                 + (wt_av/w2_av)*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) / dz &
+               !                 + (uw2_av/w2_av)*Tz &
+               !                 + (w2t_av/w2_av)*Uz &
+               !                 + (u2t_av/w2_av)*Ustz &             
+               !                 + (uvt_av/w2_av)*Vstz )             
+
+                !vwt(k,iCell) = -diff*( (vw_av/w2_av)*(wt(i1,k,iCell) - wt(i1,k+1,iCell)) / dz &
+                !                + (vt_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz &
+                !                + (wt_av/w2_av)*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) / dz &
+                !                + (vw2_av/w2_av)*Tz &
+                !                + (w2t_av/w2_av)*Vz &
+                !                + (uvt_av/w2_av)*Ustz &             
+                !                + (v2t_av/w2_av)*Vstz )             
+
+                !uws(k,iCell) = -diff*( (uw_av/w2_av)*(ws(i1,k,iCell) - ws(i1,k+1,iCell)) / dz &
+                !                + (us_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz &
+                !                + (ws_av/w2_av)*(uw(i1,k,iCell) - uw(i1,k+1,iCell)) / dz &
+                !                + (uw2_av/w2_av)*Sz &
+                !                + (w2s_av/w2_av)*Uz &
+                !                + (u2s_av/w2_av)*Ustz &             
+                !                + (uvs_av/w2_av)*Vstz )             
+
+               !vws(k,iCell) = -diff*( (vw_av/w2_av)*(ws(i1,k,iCell) - ws(i1,k+1,iCell)) / dz &
+               !                 + (vs_av/w2_av)*(w2(i1,k,iCell) - w2(i1,k+1,iCell)) / dz &
+               !                 + (ws_av/w2_av)*(vw(i1,k,iCell) - vw(i1,k+1,iCell)) / dz &
+               !                 + (vw2_av/w2_av)*Sz &
+               !                 + (w2s_av/w2_av)*Vz &
+               !                 + (uvs_av/w2_av)*Ustz &             
+               !                 + (v2s_av/w2_av)*Vstz )                  
 
                 enddo             !nVertLevels
            enddo                !nCells
@@ -837,8 +914,8 @@ module ocn_adc_mixing_fused
                  uwtend6(k,iCell) = -u2(i1,k,iCell)*Ustz - uv(i1,k,iCell)*Vstz
 !      Sum the above tendency terms to find the total uw tendency.
                  uwtend(i3_f,k,iCell) = uwtend1(k,iCell) + uwtend2(k,iCell) + &
-                   uwtend3(k,iCell) + uwtend4(k,iCell) + uwtend5(k,iCell) + uwtend6(k,iCell)  &
-                   -30.0E-8_RKIND * La_t ** (1.0_RKIND )* exp(1.0_RKIND*zm(k,iCell)/stokes_depth)     
+                   uwtend3(k,iCell) + uwtend4(k,iCell) + uwtend5(k,iCell) + uwtend6(k,iCell) ! &
+                  ! -30.0E-8_RKIND * La_t ** (-1.0_RKIND )* exp(1.0_RKIND*zm(k,iCell)/stokes_depth)     
 
                  if (config_adc_truncate_tend) then
                     uwtend(i3_f,k,iCell) = FLOAT (INT(uwtend(i3_f,k,iCell) * adcRound &
@@ -879,8 +956,8 @@ module ocn_adc_mixing_fused
                  vwtend6(k,iCell) = -uv(i1,k,iCell)*Ustz - v2(i1,k,iCell)*Vstz
 !      Sum the above tendency terms to find the total vw tendency.
                  vwtend(i3_f,k,iCell) = vwtend1(k,iCell) + vwtend2(k,iCell) + &
-                   vwtend3(k,iCell) + vwtend4(k,iCell) + vwtend5(k,iCell) + vwtend6(k,iCell) &   
-                   -1.0E-8_RKIND * La_t ** (1.0_RKIND)* exp(1.0_RKIND*zm(k,iCell)/stokes_depth)
+                   vwtend3(k,iCell) + vwtend4(k,iCell) + vwtend5(k,iCell) + vwtend6(k,iCell) !&   
+                   !-1.0E-8_RKIND * La_t ** (-1.0_RKIND)* exp(1.0_RKIND*zm(k,iCell)/stokes_depth)
 
                  if (config_adc_truncate_tend) then
                     vwtend(i3_f,k,iCell) = FLOAT (INT(vwtend(i3_f,k,iCell) * adcRound &
@@ -903,8 +980,8 @@ module ocn_adc_mixing_fused
                    (uw(i1,k,iCell)*Vstz + vw(i1,k,iCell)*Ustz) & ! Stokes
                    - (uw(i1,k,iCell)*Vz + vw(i1,k,iCell)*Uz) & ! shear production
                    + kappa_VAR*(uv(i1,k-1,iCell) - uv(i1,k+1,iCell)) / &
-                   (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND  & ! dissipation
-                   + 2.0E-8_RKIND * La_t ** (3.0_RKIND)* exp(2.0_RKIND*zm(k,iCell)/stokes_depth)
+                   (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND ! & ! dissipation
+                    !+ 2.0E-8_RKIND * La_t ** (-3.0_RKIND)* exp(2.0_RKIND*zm(k,iCell)/stokes_depth)
 
 !      Truncate the uv tendency term if the truncation flag is switched on
                  if (config_adc_truncate_tend) then
@@ -943,8 +1020,8 @@ module ocn_adc_mixing_fused
 !      included implicitly in the timestepping
                  u2tend(i3_f,k,iCell) = u2tend1(k,iCell) + u2tend2(k,iCell) + &
                    u2tend3(k,iCell) + u2tend4(k,iCell) + u2tend5(k,iCell) + &
-                   u2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*u2(i1,k,iCell)/3.0_RKIND  &  
-                  - 1.5E-8_RKIND * La_t ** (3.0_RKIND)*exp((5.0_RKIND/4.0_RKIND)*zm(k,iCell)/stokes_depth)
+                   u2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*u2(i1,k,iCell)/3.0_RKIND ! &  
+                  !- 1.5E-8_RKIND * La_t ** (-3.0_RKIND)*exp((5.0_RKIND/4.0_RKIND)*zm(k,iCell)/stokes_depth)
 
 
                  if (config_adc_truncate_tend) then
@@ -983,8 +1060,8 @@ module ocn_adc_mixing_fused
 !      included implicitly in the timestepping
                  v2tend(i3_f,k,iCell) = v2tend1(k,iCell) + v2tend2(k,iCell) + &
                    v2tend3(k,iCell) + v2tend4(k,iCell) + v2tend5(k,iCell) + &
-                   v2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*v2(i1,k,iCell)/3.0_RKIND &  
-                     + 12.0E-8_RKIND * La_t ** (3.0_RKIND)* exp(5.0_RKIND*zm(k,iCell)/stokes_depth)
+                   v2tend6(k,iCell) + 2.0_RKIND*tauVel(k,iCell)*v2(i1,k,iCell)/3.0_RKIND !&  
+                    ! + 12.0E-8_RKIND * La_t ** (-3.0_RKIND)* exp(5.0_RKIND*zm(k,iCell)/stokes_depth)
                  if (config_adc_truncate_tend) then
                     v2tend(i3_f,k,iCell) = FLOAT (INT(v2tend(i3_f,k,iCell) * adcRound &
                       + 0.5_RKIND)) / adcRound
