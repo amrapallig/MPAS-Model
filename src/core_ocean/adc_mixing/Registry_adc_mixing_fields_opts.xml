@@ -448,6 +448,24 @@
   <var name="vwtend6" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2/s^3"
        description="Stokes production of vw -[uv*d(ustokes)/dz + v2*d(vstokes)/dz]"
        />
+  <var name="uvtend1" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2/s^3"
+       description="uv tendency1"
+       />
+  <var name="uvtend2" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2/s^3"
+       description="uv tendency2"
+       />
+  <var name="uvtend3" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2/s^3"
+       description="uv tendency3"
+       />
+  <var name="uvtend4" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2/s^3"
+       description="uv tendency4"
+       />
+  <var name="uvtend5" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2/s^3"
+       description="uv tendency5"
+       />
+  <var name="uvtend6" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2/s^3"
+       description="uv tendency6"
+       />
   <var name="u2tend1" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2/s^3"
        description="turbulent transport of u2 [ -d(uuw)/dz ]"
        />
@@ -681,6 +699,12 @@
     <var name="uwtend4"/>
     <var name="uwtend5"/>
     <var name="uwtend6"/>
+    <var name="uvtend1"/>
+    <var name="uvtend2"/>
+    <var name="uvtend3"/>
+    <var name="uvtend4"/>
+    <var name="uvtend5"/>
+    <var name="uvtend6"/>
     <var name="vwtend1"/>
     <var name="vwtend2"/>
     <var name="vwtend3"/>

@@ -965,22 +965,26 @@ module ocn_adc_mixing_fused
                  endif
 
 
-!      CALCULATE UV TENDENCY TERMS (these are not saved individually)
+!      CALCULATE UV TENDENCY TERMS (these are not saved individually): Saving individually-AG
 !      The uv tendency is the sum of
 !                   (1) turbulent transport of vw [ -d(vww)/dz ]
 !                   (2) parameterized pressure-strain terms (Rotta, rapid, Stokes)
 !                   (3) shear production of uv [uw*dV/dz + vw*dU/dz]
 !                   (4) dissipation of uv [ -kappa_FL*[d(uv)/dz]^2 ]
 !      The tendency term is truncated if config_adc_truncate_tend flag it switched on
-                uvtend(i3_f,k,iCell) = -(uvw(k-1,iCell) - uvw(k,iCell)) / dz & ! transport
-                   - tauVel(k,iCell)*uv(i1,k,iCell)  & ! Rotta
-                   + 0.5_RKIND*(alpha_1+alpha_2)* &
-                   (uw(i1,k,iCell)*Vz + vw(i1,k,iCell)*Uz) & ! rapid
-                   + 0.5_RKIND*(alpha_st_1 + alpha_st_2)* &
-                   (uw(i1,k,iCell)*Vstz + vw(i1,k,iCell)*Ustz) & ! Stokes
-                   - (uw(i1,k,iCell)*Vz + vw(i1,k,iCell)*Uz) & ! shear production
-                   + kappa_VAR*(uv(i1,k-1,iCell) - uv(i1,k+1,iCell)) / &
-                   (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND ! & ! dissipation
+                 uvtend1(k,iCell) = -(uvw(k-1,iCell) - uvw(k,iCell)) / dz  ! transport
+                 uvtend2(k,iCell) = - tauVel(k,iCell)*uv(i1,k,iCell)  ! Rotta
+                 uvtend3(k,iCell) = + 0.5_RKIND*(alpha_1+alpha_2)* &
+                                  (uw(i1,k,iCell)*Vz + vw(i1,k,iCell)*Uz) ! rapid
+                 uvtend4(k,iCell) = + 0.5_RKIND*(alpha_st_1 + alpha_st_2)* &
+                                   (uw(i1,k,iCell)*Vstz + vw(i1,k,iCell)*Ustz)  ! Stokes
+                 uvtend5(k,iCell) =  - (uw(i1,k,iCell)*Vz + vw(i1,k,iCell)*Uz)  ! shear production
+                 
+                 uvtend6(k,iCell) = + kappa_VAR*(uv(i1,k-1,iCell) - uv(i1,k+1,iCell)) / &
+                                    (ze(k-1,iCell) - ze(k+1,iCell))**2.0_RKIND  ! dissipation
+
+                 uvtend(i3_f,k,iCell) = uvtend1(k,iCell) +  uvtend2(k,iCell) + uvtend3(k,iCell) &
+                       +uvtend4(k,iCell) +  uvtend5(k,iCell) +  uvtend6(k,iCell)! &
                     !+ 2.0E-8_RKIND * La_t ** (-3.0_RKIND)* exp(2.0_RKIND*zm(k,iCell)/stokes_depth)
 
 !      Truncate the uv tendency term if the truncation flag is switched on

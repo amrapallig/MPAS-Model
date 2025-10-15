@@ -70,7 +70,8 @@ module ocn_turbulence
                        uwtend6, vwtend1, vwtend2, vwtend3, vwtend4, vwtend5,   &
                        vwtend6, u2tend1, u2tend2, u2tend3, u2tend4, u2tend5,   &
                        u2tend6, v2tend1, v2tend2, v2tend3, v2tend4, v2tend5,   &
-                       v2tend6, u2cliptend, v2cliptend, w2cliptend
+                       v2tend6, u2cliptend, v2cliptend, w2cliptend, uvtend1,   &
+                       uvtend2, uvtend3, uvtend4, uvtend5, uvtend6
 
    real(kind=RKIND), public, dimension(:,:,:), allocatable :: u2, v2, w2, t2, s2, &
                        uw, vw, wt, ws, w3, uv, ut, vt, us, vs, ts, eps, KspsU, KspsD, &
@@ -128,7 +129,8 @@ module ocn_turbulence
                        vwtend4Tmp, vwtend5Tmp, vwtend6Tmp, u2tend1Tmp, u2tend2Tmp,   &
                        u2tend3Tmp, u2tend4Tmp, u2tend5Tmp, u2tend6Tmp, v2tend1Tmp,   &
                        v2tend2Tmp, v2tend3Tmp, v2tend4Tmp, v2tend5Tmp, v2tend6Tmp,   &
-                       u2cliptendTmp, v2cliptendTmp, w2cliptendTmp
+                       u2cliptendTmp, v2cliptendTmp, w2cliptendTmp, uvtend1Tmp,      &
+                       uvtend2Tmp, uvtend3Tmp, uvtend4Tmp, uvtend5Tmp, uvtend6Tmp
 
    real(kind=RKIND), dimension(:,:), pointer :: u2Tmp, v2Tmp, w2Tmp, t2Tmp, s2Tmp, &
                        uwTmp, vwTmp, wtTmp, wsTmp, w3Tmp, uvTmp, utTmp, vtTmp, usTmp,&
@@ -335,6 +337,12 @@ module ocn_turbulence
       call mpas_pool_get_array(adcTendPool, 'uwtend4', uwtend4Tmp)
       call mpas_pool_get_array(adcTendPool, 'uwtend5', uwtend5Tmp)
       call mpas_pool_get_array(adcTendPool, 'uwtend6', uwtend6Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend1', uvtend1Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend2', uvtend2Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend3', uvtend3Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend4', uvtend4Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend5', uvtend5Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend6', uvtend6Tmp)
       call mpas_pool_get_array(adcTendPool, 'vwtend1', vwtend1Tmp)
       call mpas_pool_get_array(adcTendPool, 'vwtend2', vwtend2Tmp)
       call mpas_pool_get_array(adcTendPool, 'vwtend3', vwtend3Tmp)
@@ -384,6 +392,12 @@ module ocn_turbulence
       allocate( uwtend4( nVertLevelsP1, nCells ))
       allocate( uwtend5( nVertLevelsP1, nCells ))
       allocate( uwtend6( nVertLevelsP1, nCells ))
+      allocate( uvtend1( nVertLevelsP1, nCells ))
+      allocate( uvtend2( nVertLevelsP1, nCells ))
+      allocate( uvtend3( nVertLevelsP1, nCells ))
+      allocate( uvtend4( nVertLevelsP1, nCells ))
+      allocate( uvtend5( nVertLevelsP1, nCells ))
+      allocate( uvtend6( nVertLevelsP1, nCells ))
       allocate( vwtend1( nVertLevelsP1, nCells ))
       allocate( vwtend2( nVertLevelsP1, nCells ))
       allocate( vwtend3( nVertLevelsP1, nCells ))
@@ -447,6 +461,12 @@ module ocn_turbulence
       uwtend4 = uwtend4Tmp
       uwtend5 = uwtend5Tmp
       uwtend6 = uwtend6Tmp
+      uvtend1 = uvtend1Tmp
+      uvtend2 = uvtend2Tmp
+      uvtend3 = uvtend3Tmp
+      uvtend4 = uvtend4Tmp
+      uvtend5 = uvtend5Tmp
+      uvtend6 = uvtend6Tmp      
       vwtend1 = vwtend1Tmp
       vwtend2 = vwtend2Tmp
       vwtend3 = vwtend3Tmp
@@ -686,6 +706,12 @@ module ocn_turbulence
       !$acc                  uwtend3,     &
       !$acc                  uwtend4,     &
       !$acc                  uwtend5,     &
+      !$acc                  uvtend1,     &
+      !$acc                  uvtend2,     &
+      !$acc                  uvtend3,     &
+      !$acc                  uvtend4,     &
+      !$acc                  uvtend5,     &
+      !$acc                  uvtend6,     &
       !$acc                  vwtend1,     &
       !$acc                  vwtend2,     &
       !$acc                  vwtend3,     &
@@ -775,7 +801,8 @@ module ocn_turbulence
                        vwtend4Tmp, vwtend5Tmp, vwtend6Tmp, u2tend1Tmp, u2tend2Tmp,   &
                        u2tend3Tmp, u2tend4Tmp, u2tend5Tmp, u2tend6Tmp, v2tend1Tmp,   &
                        v2tend2Tmp, v2tend3Tmp, v2tend4Tmp, v2tend5Tmp, v2tend6Tmp,   &
-                       u2cliptendTmp, v2cliptendTmp, w2cliptendTmp
+                       u2cliptendTmp, v2cliptendTmp, w2cliptendTmp, uvtend1Tmp,      &
+                       uvtend2Tmp, uvtend3Tmp, uvtend4Tmp, uvtend5Tmp, uvtend6Tmp
 
    real(kind=RKIND), dimension(:,:), pointer :: u2Tmp, v2Tmp, w2Tmp, t2Tmp, s2Tmp, &
                        uwTmp, vwTmp, wtTmp, wsTmp, w3Tmp, uvTmp, utTmp, vtTmp, usTmp,&
@@ -895,6 +922,12 @@ module ocn_turbulence
       !$acc                  uwtend3,     &
       !$acc                  uwtend4,     &
       !$acc                  uwtend5,     &
+      !$acc                  uvtend1,     &
+      !$acc                  uvtend2,     &
+      !$acc                  uvtend3,     &
+      !$acc                  uvtend4,     &
+      !$acc                  uvtend5,     &
+      !$acc                  uutend6,     &
       !$acc                  vwtend1,     &
       !$acc                  vwtend2,     &
       !$acc                  vwtend3,     &
@@ -1080,6 +1113,12 @@ module ocn_turbulence
       call mpas_pool_get_array(adcTendPool, 'uwtend4', uwtend4Tmp)
       call mpas_pool_get_array(adcTendPool, 'uwtend5', uwtend5Tmp)
       call mpas_pool_get_array(adcTendPool, 'uwtend6', uwtend6Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend1', uvtend1Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend2', uvtend2Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend3', uvtend3Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend4', uvtend4Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend5', uvtend5Tmp)
+      call mpas_pool_get_array(adcTendPool, 'uvtend6', uvtend6Tmp)
       call mpas_pool_get_array(adcTendPool, 'vwtend1', vwtend1Tmp)
       call mpas_pool_get_array(adcTendPool, 'vwtend2', vwtend2Tmp)
       call mpas_pool_get_array(adcTendPool, 'vwtend3', vwtend3Tmp)
@@ -1136,6 +1175,12 @@ module ocn_turbulence
       uwtend4Tmp = uwtend4
       uwtend5Tmp = uwtend5
       uwtend6Tmp = uwtend6
+      uvtend1Tmp = uvtend1
+      uvtend2Tmp = uvtend2
+      uvtend3Tmp = uvtend3
+      uvtend4Tmp = uvtend4
+      uvtend5Tmp = uvtend5
+      uvtend6Tmp = uvtend6
       vwtend1Tmp = vwtend1
       vwtend2Tmp = vwtend2
       vwtend3Tmp = vwtend3
@@ -1381,6 +1426,12 @@ module ocn_turbulence
       !$acc                  uwtend3,     &
       !$acc                  uwtend4,     &
       !$acc                  uwtend5,     &
+      !$acc                  uvtend1,     &
+      !$acc                  uvtend2,     &
+      !$acc                  uvtend3,     &
+      !$acc                  uvtend4,     &
+      !$acc                  uvtend5,     &
+      !$acc                  uvtend6,     &
       !$acc                  vwtend1,     &
       !$acc                  vwtend2,     &
       !$acc                  vwtend3,     &
@@ -1512,6 +1563,12 @@ module ocn_turbulence
                  uwtend4,     &
                  uwtend5,     &
                  uwtend6,     &
+                 uvtend1,     &
+                 uvtend2,     &
+                 uvtend3,     &
+                 uvtend4,     &
+                 uvtend5,     &
+                 uvtend6,     &
                  vwtend1,     &
                  vwtend2,     &
                  vwtend3,     &

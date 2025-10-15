@@ -538,6 +538,8 @@ contains
                 uwtend1, uwtend2, uwtend3, uwtend4,  &
                 uwtend5, uwtend6, vwtend1, vwtend2,  &
                 vwtend3, vwtend4, vwtend5, vwtend6,  &
+                uvtend1, uvtend2, uvtend3, uvtend4,  &
+                uvtend5, uvtend6,                    &
                 u2tend1, u2tend2, u2tend3, u2tend4,  &
                 u2tend5, u2tend6, v2tend1, v2tend2,  &
                 v2tend3, v2tend4,v2tend5, v2tend6,   &
